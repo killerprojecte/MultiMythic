@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.rgbmc.multimythic'
+version = '1.0.0-4.14.2'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly "org.spigotmc:spigot:1.19.3"
+}

@@ -1,0 +1,93 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+group = 'dev.rgbmc'
+version = '1.0.0-4.14.2'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "spigotmc-repo"
+        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+        maven {
+            name = "spigotmc-repo"
+            url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/groups/public/"
+        }
+        maven {
+            name = "lumine"
+            url = "https://mvn.lumine.io/repository/maven-public/"
+        }
+        maven {
+            name = "FastMCMirror"
+            url = "https://repo.fastmcmirror.org/content/repositories/releases/"
+        }
+        maven {
+            name = "Mojang Libraries"
+            url = "https://libraries.minecraft.net/"
+        }
+    }
+
+    dependencies {
+        compileOnly "org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT"
+        compileOnly "io.lumine:Mythic-Dist:4.14.2"
+        compileOnly "com.mojang:authlib:1.6.25"
+        compileOnly 'it.unimi.dsi:fastutil:8.5.12'
+    }
+
+    compileJava {
+        options.release = 17
+        options.encoding = 'UTF-8'
+    }
+}
+
+dependencies {
+    compileOnly "org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT"
+    implementation project(":v1_19_R1")
+    implementation project(":v1_19_R2")
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
+
+shadowJar {
+    archiveClassifier = ""
+}

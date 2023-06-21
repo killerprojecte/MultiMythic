@@ -1,0 +1,9 @@
+name: MultiMythic
+version: '${version}'
+main: dev.rgbmc.multimythic.MultiMythic
+api-version: 1.13
+load: STARTUP
+depend: [ MythicMobs ]
+authors: [ FlyProject ]
+description: Make older MythicMobs support more versions
+website: https://rgbmc.wiki/zh/MultiMythic
