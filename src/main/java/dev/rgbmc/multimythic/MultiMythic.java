@@ -9,7 +9,7 @@ public final class MultiMythic extends JavaPlugin {
         getLogger().warning("MultiMythic 仅支持MythicMobs 4.14.2 在其他版本上(仅4.X)运行 可能会出现异常");
         getLogger().warning("MultiMythic 不支持MythicMobs 5.X");
         getLogger().warning("===========================================");
-        getLogger().warning("已支持的版本有: 1.19.1, 1.19.2");
+        getLogger().warning("已支持的版本有: 1_19_R1, 1_19_R2, 1_19_R3, 1_20_R1");
         getLogger().warning("此插件为实验品 具有不稳定性 请谨慎尝试");
     }
 

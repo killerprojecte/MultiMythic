@@ -1,4 +1,4 @@
-package io.lumine.xikage.mythicmobs.volatilecode.v1_19_R2;
+package io.lumine.xikage.mythicmobs.volatilecode.v1_19_R3;
 
 import io.lumine.xikage.mythicmobs.adapters.AbstractEntity;
 import io.lumine.xikage.mythicmobs.adapters.AbstractLocation;
@@ -29,10 +29,8 @@ import net.minecraft.network.syncher.DataWatcherRegistry;
 import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityLightning;
-import net.minecraft.world.entity.EntityLiving;
-import net.minecraft.world.entity.EntitySize;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeMapBase;
 import net.minecraft.world.entity.decoration.EntityArmorStand;
 import net.minecraft.world.entity.item.EntityItem;
@@ -42,14 +40,13 @@ import net.minecraft.world.phys.Vec3D;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftItem;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftChatMessage;
-import org.bukkit.entity.Entity;
+import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R3.util.CraftChatMessage;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -60,18 +57,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
 
-public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
-    private static final String ENTITY_DIMENSIONS = "aZ";
-    private static final String ENTITY_EYE_HEIGHT = "ba";
+public class VolatileEntityHandler_v1_19_R3 implements VolatileEntityHandler {
+    private static final String ENTITY_DIMENSIONS = "be";
+    private static final String ENTITY_EYE_HEIGHT = "bf";
     private static final String ATTRIBUTES = "b";
-    private static final String BYPASS_ARMOR = "x";
-    private static final String FOOD_EXHAUSTION = "B";
-    private static final String BYPASS_ENCHANTS = "A";
     private static final Reflector<AttributeMapBase> refAttributeMap = new Reflector<AttributeMapBase>(AttributeMapBase.class, "b");
-    private static final Reflector<DamageSource> refDamageSource = new Reflector<DamageSource>(DamageSource.class, "x", "B", "A");
-    private static final Reflector<net.minecraft.world.entity.Entity> refEntity = new Reflector<net.minecraft.world.entity.Entity>(net.minecraft.world.entity.Entity.class, "aZ", "ba");
+    private static final Reflector<net.minecraft.world.entity.Entity> refEntity = new Reflector<net.minecraft.world.entity.Entity>(net.minecraft.world.entity.Entity.class, "be", "bf");
 
-    public VolatileEntityHandler_v1_19_R2(VolatileCodeHandler handler) {
+    public VolatileEntityHandler_v1_19_R3(VolatileCodeHandler handler) {
     }
 
     @Override
@@ -97,7 +90,7 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
         aTarget.setMetadata("skill-damage", data);
         SkillCaster skillCaster = caster;
         if (skillCaster instanceof ActiveMob am) {
-           am.setLastDamageSkillAmount(damage);
+            am.setLastDamageSkillAmount(damage);
         }
         EntityLiving target = ((CraftLivingEntity) aTarget.getBukkitEntity()).getHandle();
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID(), "mythic$kbresist", 1.0, AttributeModifier.Operation.ADD_NUMBER);
@@ -122,48 +115,49 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     }
 
     private DamageSource getDamageSource(DamageMetadata data) {
+        DamageSources damageSources = ((CraftEntity) data.getDamager().getEntity().getBukkitEntity()).getHandle().Y().af();
         String var3 = data.getDamageCause().toLowerCase();
         DamageSource reason;
         switch (var3) {
             case "entity_attack":
                 if (data.getDamager().getEntity().isPlayer()) {
-                    reason = DamageSource.a(((CraftPlayer) data.getDamager().getEntity().getBukkitEntity()).getHandle());
+                    reason = damageSources.a(((CraftPlayer) data.getDamager().getEntity().getBukkitEntity()).getHandle());
                 } else {
-                    reason = DamageSource.c((EntityLiving) ((CraftEntity) data.getDamager().getEntity().getBukkitEntity()).getHandle());
+                    reason = damageSources.b((EntityLiving) ((CraftEntity) data.getDamager().getEntity().getBukkitEntity()).getHandle());
                 }
                 break;
             case "magic":
-                reason = DamageSource.o;
+                reason = damageSources.o();
                 break;
             case "thorns":
-                reason = DamageSource.d(((CraftEntity) data.getDamager().getEntity().getBukkitEntity()).getHandle());
+                reason = damageSources.d(((CraftEntity) data.getDamager().getEntity().getBukkitEntity()).getHandle());
                 break;
             case "fire":
-                reason = DamageSource.a;
+                reason = damageSources.a();
                 break;
             case "fire_tick":
-                reason = DamageSource.c;
+                reason = damageSources.c();
                 break;
             case "dragon_breath":
-                reason = DamageSource.q;
+                reason = damageSources.q();
                 break;
             case "lava":
-                reason = DamageSource.d;
+                reason = damageSources.d();
                 break;
             case "hot_floor":
-                reason = DamageSource.e;
+                reason = damageSources.e();
                 break;
             case "void":
-                reason = DamageSource.m;
+                reason = damageSources.m();
                 break;
             case "freeze":
-                reason = DamageSource.t;
+                reason = damageSources.t();
                 break;
             case "fall":
-                reason = DamageSource.k;
+                reason = damageSources.k();
                 break;
             default:
-                reason = DamageSource.n;
+                reason = damageSources.n();
         }
 
         return reason;
@@ -172,19 +166,19 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     @Override
     public float getEntityAbsorptionHearts(AbstractEntity entity) {
         if (!entity.isLiving()) {
-            return 0.0F;
-        } else {
-            EntityLiving el = (EntityLiving) ((CraftEntity) entity.getBukkitEntity()).getHandle();
-            return el.eW();
+            return 0.0f;
         }
+        EntityLiving el = (EntityLiving) ((CraftEntity) entity.getBukkitEntity()).getHandle();
+        return el.fb();
     }
 
     @Override
     public void setEntityAbsorptionHearts(AbstractEntity entity, float value) {
-        if (entity.isLiving()) {
-            EntityLiving el = (EntityLiving) ((CraftEntity) entity.getBukkitEntity()).getHandle();
-            el.u(value);
+        if (!entity.isLiving()) {
+            return;
         }
+        EntityLiving el = (EntityLiving) ((CraftEntity) entity.getBukkitEntity()).getHandle();
+        el.x(value);
     }
 
     @Override
@@ -202,7 +196,7 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
         if (entity.isPlayer()) {
             this.playerConnectionTeleport(entity, x, y, z, yaw, pitch, noRotation, noGravity);
         }
-        if (e.s instanceof WorldServer) {
+        if (e.H instanceof WorldServer) {
             // empty if block
         }
     }
@@ -210,47 +204,47 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     @Override
     public void setPlayerRotation(AbstractPlayer entity, float yaw, float pitch) {
         EntityPlayer me = ((CraftPlayer) entity.getBukkitEntity()).getHandle();
-        HashSet<PacketPlayOutPosition.EnumPlayerTeleportFlags> set = new HashSet<>();
-        set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.a);
-        set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.b);
-        set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.c);
-        set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.e);
-        set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.d);
-        me.b.a(new PacketPlayOutPosition(0.0, 0.0, 0.0, yaw, pitch, set, 0, false));
+        HashSet<RelativeMovement> set = new HashSet<RelativeMovement>();
+        set.add(RelativeMovement.a);
+        set.add(RelativeMovement.b);
+        set.add(RelativeMovement.c);
+        set.add(RelativeMovement.e);
+        set.add(RelativeMovement.d);
+        me.b.a(new PacketPlayOutPosition(0.0, 0.0, 0.0, yaw, pitch, set, 0));
     }
 
     private void playerConnectionTeleport(AbstractEntity entity, double x, double y, double z, float yaw, float pitch, boolean noRotation, boolean noGravity) {
         EntityPlayer me = ((CraftPlayer) entity.getBukkitEntity()).getHandle();
-        HashSet<PacketPlayOutPosition.EnumPlayerTeleportFlags> set = new HashSet<PacketPlayOutPosition.EnumPlayerTeleportFlags>();
+        HashSet<RelativeMovement> set = new HashSet<RelativeMovement>();
         boolean dismountVehicle = false;
         if (noRotation) {
             pitch = 0.0f;
             yaw = 0.0f;
-            set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.e);
-            set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.d);
+            set.add(RelativeMovement.e);
+            set.add(RelativeMovement.d);
         }
         if (noGravity) {
-            set.add(PacketPlayOutPosition.EnumPlayerTeleportFlags.b);
+            set.add(RelativeMovement.b);
             y = 0.0;
         }
-        me.b.a(new PacketPlayOutPosition(x, y, z, yaw, pitch, set, 0, dismountVehicle));
+        me.b.a(new PacketPlayOutPosition(x, y, z, yaw, pitch, set, 0));
     }
 
     @Override
     public boolean isEntityInMotion(AbstractEntity entity, boolean exact) {
         if (entity.isLiving()) {
             EntityLiving e = (EntityLiving) ((CraftEntity) entity.getBukkitEntity()).getHandle();
-            Vec3D position = e.dd();
+            Vec3D position = e.de();
             if (exact) {
-               return e.t != position.a() || e.u != position.b() || e.v != position.c();
+                return e.I != position.a() || e.J != position.b() || e.K != position.c();
             } else {
-                int x = Numbers.floor(e.t);
-                int y = Numbers.floor(e.u);
-                int z = Numbers.floor(e.v);
+                int x = Numbers.floor(e.I);
+                int y = Numbers.floor(e.J);
+                int z = Numbers.floor(e.K);
                 int pX = Numbers.floor(position.a());
                 int pY = Numbers.floor(position.b());
                 int pZ = Numbers.floor(position.c());
-               return x != pX || y != pY || z != pZ;
+                return x != pX || y != pY || z != pZ;
             }
         }
         return false;
@@ -260,10 +254,10 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     public AbstractVector getEntityMotion(AbstractEntity entity) {
         if (entity.isLiving()) {
             EntityLiving e = (EntityLiving) ((CraftEntity) entity.getBukkitEntity()).getHandle();
-            Vec3D position = e.dd();
-            double x = position.a() - e.t;
-            double y = position.b() - e.u;
-            double z = position.c() - e.v;
+            Vec3D position = e.de();
+            double x = position.a() - e.I;
+            double y = position.b() - e.J;
+            double z = position.c() - e.K;
             return new AbstractVector(x, y, z);
         }
         return new AbstractVector(0, 0, 0);
@@ -272,25 +266,25 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     @Override
     public void setHitBox(AbstractEntity target, double a0, double a1, double a2) {
         org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
-        net.minecraft.world.entity.Entity ent = ((CraftEntity) entity).getHandle();
-        AxisAlignedBB bb = new AxisAlignedBB(ent.dk() - a0 / 2.0, ent.dm(), ent.dq() - a0 / 2.0, ent.dk() + a0 / 2.0, ent.dm() + a0, ent.dq() + a0 / 2.0);
+        Entity ent = ((CraftEntity) entity).getHandle();
+        AxisAlignedBB bb = new AxisAlignedBB(ent.dl() - a0 / 2.0, ent.dn(), ent.dr() - a0 / 2.0, ent.dl() + a0 / 2.0, ent.dn() + a0, ent.dr() + a0 / 2.0);
         ent.a(bb);
-        refEntity.set(ent, "aZ", new EntitySize((float) a0, (float) a1, true));
-        refEntity.set(ent, "ba", (float) (a1 * 0.8));
+        refEntity.set(ent, ENTITY_DIMENSIONS, new EntitySize((float) a0, (float) a1, true));
+        refEntity.set(ent, ENTITY_EYE_HEIGHT, Float.valueOf((float) (a1 * 0.8)));
     }
 
     @Override
     public void setItemPosition(AbstractEntity target, AbstractLocation ol) {
-        Entity entity = BukkitAdapter.adapt(target);
+        org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
         if (entity instanceof Item item) {
-           EntityItem ei = (EntityItem) ((CraftItem) item).getHandle();
+            EntityItem ei = (EntityItem) ((CraftItem) item).getHandle();
             ei.h(ol.getX(), ol.getY(), ol.getZ());
         }
     }
 
     @Override
     public void sendEntityTeleportPacket(AbstractEntity target) {
-        Entity entity = BukkitAdapter.adapt(target);
+        org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
         net.minecraft.world.entity.Entity me = ((CraftEntity) entity).getHandle();
         PacketPlayOutEntityTeleport tp = new PacketPlayOutEntityTeleport(me);
         entity.getLocation().getWorld().getNearbyEntities(entity.getLocation(), 32.0, 32.0, 32.0).forEach(e -> {
@@ -302,15 +296,15 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
 
     @Override
     public void setEntityRotation(AbstractEntity target, float pitch, float yaw) {
-        Entity entity = BukkitAdapter.adapt(target);
-        net.minecraft.world.entity.Entity me = ((CraftEntity) entity).getHandle();
-        me.p(yaw);
-        me.q(pitch);
+        org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
+        Entity me = ((CraftEntity) entity).getHandle();
+        me.f(yaw);
+        me.e(pitch);
     }
 
     @Override
     public void setArmorStandNoGravity(AbstractEntity target) {
-        Entity entity = BukkitAdapter.adapt(target);
+        org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
         if (entity.getType() == EntityType.ARMOR_STAND) {
             EntityArmorStand as = (EntityArmorStand) ((CraftEntity) entity).getHandle();
             as.e(true);
@@ -344,10 +338,10 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
         Player player = BukkitAdapter.adapt(target);
         EntityPlayer ep = ((CraftPlayer) player).getHandle();
         if (radius == -1) {
-            border = ep.y().q_();
+            border = ep.x().p_();
         } else {
             border = new WorldBorder();
-            border.world = ep.y().q_().world;
+            border.world = ep.x().p_().world;
             border.c(center.getX(), center.getZ());
             border.a((double) radius);
             border.c(1);
@@ -370,11 +364,11 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     }
 
     public void hideEntityModel(AbstractEntity target) {
-        Entity entity = BukkitAdapter.adapt(target);
+        org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
         net.minecraft.world.entity.Entity me = ((CraftEntity) entity).getHandle();
-        DataWatcher w = me.al();
+        DataWatcher w = me.aj();
         w.b(new DataWatcherObject(0, DataWatcherRegistry.a), (Object) 32);
-        PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(me.ah(), w.c());
+        PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(me.af(), w.c());
     }
 
     @Override
@@ -390,7 +384,7 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
 
     @Override
     public void setEntitySpawnReason(AbstractEntity target, SpawnReason reason) {
-        Entity entity = BukkitAdapter.adapt(target);
+        org.bukkit.entity.Entity entity = BukkitAdapter.adapt(target);
         World world = BukkitAdapter.adapt(target.getWorld());
         net.minecraft.world.entity.Entity entityHandle = ((CraftEntity) entity).getHandle();
         WorldServer worldHandle = ((CraftWorld) world).getHandle();
@@ -402,18 +396,21 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
         Player player = (Player) target.getBukkitEntity();
         EntityPlayer me = ((CraftPlayer) player).getHandle();
         me.j(ticks);
-        me.b.a(new PacketPlayOutEntityMetadata(me.ah(), me.al().c()));
+        me.b.a(new PacketPlayOutEntityMetadata(me.af(), me.aj().c()));
     }
 
     @Override
     public void playEntityAnimation(AbstractEntity target, byte effect, Collection<AbstractEntity> audience) {
-        net.minecraft.world.entity.Entity e = ((CraftEntity) target.getBukkitEntity()).getHandle();
+        Entity e = ((CraftEntity) target.getBukkitEntity()).getHandle();
         PacketPlayOutAnimation packet = new PacketPlayOutAnimation(e, effect);
-        for (AbstractEntity entity : audience) {
-            if (!entity.isPlayer()) continue;
-            Player player = (Player) entity.getBukkitEntity();
-            EntityPlayer me = ((CraftPlayer) player).getHandle();
-            me.b.a(packet);
+
+        for (AbstractEntity abstractEntity : audience) {
+            AbstractPlayer entity = (AbstractPlayer) abstractEntity;
+            if (entity.isPlayer()) {
+                Player player = (Player) entity.getBukkitEntity();
+                EntityPlayer me = ((CraftPlayer) player).getHandle();
+                me.b.a(packet);
+            }
         }
     }
 
@@ -422,8 +419,8 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
         Location location = BukkitAdapter.adapt(target);
         World world = location.getWorld();
         WorldServer worldHandle = ((CraftWorld) world).getHandle();
-        EntityLightning entitylightning = EntityTypes.Y.a(worldHandle);
-        entitylightning.a_(Vec3D.a(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
+        EntityLightning entitylightning = EntityTypes.ai.a(worldHandle);
+        entitylightning.a(Vec3D.b(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
         entitylightning.a(true);
         PacketPlayOutSpawnEntity spawnItem = new PacketPlayOutSpawnEntity(entitylightning);
         double distanceSquared = radius * radius;
@@ -448,7 +445,7 @@ public class VolatileEntityHandler_v1_19_R2 implements VolatileEntityHandler {
     public CompoundTag getNBTData(AbstractEntity entity) {
         org.bukkit.entity.Entity bukkitEntity = entity.getBukkitEntity();
         NBTTagCompound compound = new NBTTagCompound();
-        return CompoundTag_v1_19_R2.fromNMSTag(compound);
+        return CompoundTag_v1_19_R3.fromNMSTag(compound);
     }
 
     @Override
